@@ -7,5 +7,8 @@ public class TouchObservable : MonoBehaviour
 
     public IObservable<SingleTouch> SingleDrag { get { return impl.SingleDrag; } }
 
+    public IObservable<DoubleTouch> Pinch { get { return impl.Pinch; } }
+    public IObservable<Unit> PinchEnd { get { return impl.PinchEnd; } }
+
     void Start() { impl.Initialize(this); }
 }

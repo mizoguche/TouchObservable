@@ -2,10 +2,10 @@
 
 public struct SingleTouch
 {
-    public Vector3 Position;
-    public Vector3 DeltaPosition;
+    public Vector2 Position;
+    public Vector2 DeltaPosition;
 
-    public SingleTouch(Vector3 position, Vector3 deltaPosition)
+    public SingleTouch(Vector2 position, Vector2 deltaPosition)
     {
         Position = position;
         DeltaPosition = deltaPosition;
