@@ -10,6 +10,9 @@ public class CameraPositionHandler : MonoBehaviour
     private float moveSpeed = 0.5f;
 
     [SerializeField]
+    private float zoomSpeed = 0.5f;
+
+    [SerializeField]
     Transform cameraContainerTransform;
 
     TouchObservable touchObservable;
@@ -23,8 +26,16 @@ public class CameraPositionHandler : MonoBehaviour
     {
         touchObservable.SingleDrag
             .Select(touch => touch.DeltaPosition)
-            .Where(delta => delta != Vector3.zero)
+            .Where(delta => delta != Vector2.zero)
             .Select(delta => new Vector3(-delta.x * moveSpeed * 0.05f, 0, -delta.y * moveSpeed * 0.05f))
             .Subscribe(delta => cameraContainerTransform.position += delta);
+
+        touchObservable.Pinch
+            .TakeUntil(touchObservable.PinchEnd)
+            .Buffer(2, 1)
+            .Where(t => t.Count == 2)
+            .RepeatUntilDestroy(this)
+            .Select(t => t.Last().Distance - t.First().Distance)
+            .Subscribe(delta => cameraContainerTransform.localPosition -= new Vector3(0, 0, delta * moveSpeed * 0.05f));
     }
 }
