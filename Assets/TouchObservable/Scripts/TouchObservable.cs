@@ -3,7 +3,11 @@ using UnityEngine;
 
 public class TouchObservable : MonoBehaviour
 {
+    #if UNITY_IOS || UNITY_ANDROID
+    TouchObservableImplementor impl = new TouchObservableImplementorMobile();
+    #else
     TouchObservableImplementor impl = new TouchObservableImplementorEditor();
+    #endif
 
     public IObservable<SingleTouch> SingleDrag { get { return impl.SingleDrag; } }
 
