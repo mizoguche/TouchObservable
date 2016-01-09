@@ -12,4 +12,9 @@ public abstract class TouchObservableImplementor
     public IObservable<DoubleTouch> Pinch { get { return PinchStream.AsObservable(); } }
     protected Subject<Unit> PinchEndStream = new Subject<Unit>();
     public IObservable<Unit> PinchEnd { get { return PinchEndStream.AsObservable(); } }
+
+    protected Subject<DoubleTouch> DoubleDragStream = new Subject<DoubleTouch>();
+    public IObservable<DoubleTouch> DoubleDrag { get { return DoubleDragStream.AsObservable(); } }
+    protected Subject<Unit> DoubleDragEndStream = new Subject<Unit>();
+    public IObservable<Unit> DoubleDragEnd { get { return DoubleDragEndStream.AsObservable(); } }
 }

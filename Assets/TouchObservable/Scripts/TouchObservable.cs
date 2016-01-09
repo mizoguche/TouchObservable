@@ -10,5 +10,8 @@ public class TouchObservable : MonoBehaviour
     public IObservable<DoubleTouch> Pinch { get { return impl.Pinch; } }
     public IObservable<Unit> PinchEnd { get { return impl.PinchEnd; } }
 
+    public IObservable<DoubleTouch> DoubleDrag { get { return impl.DoubleDrag; } }
+    public IObservable<Unit> DoubleDragEnd { get { return impl.DoubleDragEnd; } }
+
     void Start() { impl.Initialize(this); }
 }
