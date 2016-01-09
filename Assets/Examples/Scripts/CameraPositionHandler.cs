@@ -46,6 +46,5 @@ public class CameraPositionHandler : MonoBehaviour
             .Where(p => p != Vector2.zero)
             .Select(d => new Vector3(Mathf.Clamp(cameraContainerTransform.eulerAngles.x - d.y * swipeTurnSpeed * 0.3f, 0, 65), cameraContainerTransform.eulerAngles.y + d.x * swipeTurnSpeed * 0.3f, 0))
             .Subscribe(e => cameraContainerTransform.eulerAngles = e);
-
     }
 }
