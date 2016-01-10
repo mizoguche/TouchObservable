@@ -22,7 +22,7 @@ public class TouchObservableImplementorEditor : TouchObservableImplementor
 
         // SingleDrag
         updateObservable
-            .Where(_ => !isPinchOptionKeyHolding() && !isDoubleDragKeyHolding())
+            .Where(_ => !isDoubleDragKeyHolding())
             .SkipUntil(touchDown)
             .TakeUntil(touchUp)
             .Select(_ => new Vector2(Input.mousePosition.x, Input.mousePosition.y))
@@ -33,50 +33,6 @@ public class TouchObservableImplementorEditor : TouchObservableImplementor
             .Select(delta => new SingleTouch(new Vector2(Input.mousePosition.x, Input.mousePosition.y), delta))
             .Subscribe(touch => SingleDragStream.OnNext(touch));
 
-        // Pinch
-        updateObservable
-            .Where(_ => isPinchOptionKeyDown())
-            .Subscribe(_ =>
-            {
-                var indicatorObject = GameObject.Instantiate(Resources.Load("Prefabs/TouchIndicator")) as GameObject;
-                indicator = indicatorObject.GetComponent<TouchIndicator>();
-            }); ;
-        var pinching = updateObservable
-            .Where(_ => isPinchOptionKeyHolding());
-        pinching
-            .Subscribe(_ =>
-            {
-                var touch1 = new SingleTouch(Input.mousePosition, Input.mouseScrollDelta);
-                var touch2 = new SingleTouch(new Vector3(Screen.width, Screen.height) - Input.mousePosition, new Vector2(Screen.width, Screen.height) - Input.mouseScrollDelta);
-                var touches = new DoubleTouch(new List<SingleTouch> { touch1, touch2 }, Vector2.Distance(touch1.Position, touch2.Position));
-                indicator.SetPosition(touches);
-            });
-        pinching
-            .SkipUntil(touchDown)
-            .TakeUntil(touchUp)
-            .Select(_ => new Vector2(Input.mousePosition.x, Input.mousePosition.y))
-            .Buffer(2, 1)
-            .Where(touches => touches.Count == 2)
-            .RepeatUntilDestroy(touchObservable)
-            .Select(touches => touches.Last() - touches.First())
-            .Select(delta => new SingleTouch(new Vector2(Input.mousePosition.x, Input.mousePosition.y), delta))
-            .Subscribe(touch1 =>
-            {
-                var touch2 = new SingleTouch(new Vector2(Screen.width, Screen.height) - touch1.Position, new Vector2(Screen.width, Screen.height) - touch1.DeltaPosition);
-                var touches = new DoubleTouch(new List<SingleTouch> { touch1, touch2 }, Vector2.Distance(touch1.Position, touch2.Position));
-                PinchStream.OnNext(touches);
-            });
-        pinching
-            .Zip(touchUp, (l, r) => Unit.Default)
-            .Subscribe(_ => PinchEndStream.OnNext(Unit.Default));
-
-        updateObservable
-            .Where(_ => isPinchOptionKeyUp())
-            .Subscribe(_ =>
-            {
-                GameObject.Destroy(indicator.gameObject);
-            });
-
         // Double drag
         updateObservable
             .Where(_ => isDoubleDragKeyDown())
@@ -85,6 +41,8 @@ public class TouchObservableImplementorEditor : TouchObservableImplementor
                 var xDelta = (Screen.width - Input.mousePosition.x) - Input.mousePosition.x;
                 var yDelta = (Screen.height - Input.mousePosition.y) - Input.mousePosition.y;
                 doubleDraggingDelta = new Vector2(xDelta, yDelta);
+                var indicatorObject = GameObject.Instantiate(Resources.Load("Prefabs/TouchIndicator")) as GameObject;
+                indicator = indicatorObject.GetComponent<TouchIndicator>();
             });
 
         var doubleDragging = updateObservable
@@ -115,35 +73,27 @@ public class TouchObservableImplementorEditor : TouchObservableImplementor
         doubleDragging
             .Zip(touchUp, (l, r) => Unit.Default)
             .Subscribe(_ => DoubleDragEndStream.OnNext(Unit.Default));
-    }
 
-    bool isPinchOptionKeyDown()
-    {
-        return (Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.RightAlt)) && !(Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift));
-    }
-
-    bool isPinchOptionKeyHolding()
-    {
-        return (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) && !(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
-    }
-
-    bool isPinchOptionKeyUp()
-    {
-        return (Input.GetKeyUp(KeyCode.LeftAlt) || Input.GetKeyUp(KeyCode.RightAlt)) && !(Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift));
+        updateObservable
+            .Where(_ => isDoubleDragKeyUp())
+            .Subscribe(_ =>
+            {
+                GameObject.Destroy(indicator.gameObject);
+            });
     }
 
     bool isDoubleDragKeyDown()
     {
-        return (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) && (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift));
+        return Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.RightAlt);
     }
 
     bool isDoubleDragKeyHolding()
     {
-        return (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+        return Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
     }
 
     bool isDoubleDragKeyUp()
     {
-        return (Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift));
+        return Input.GetKeyUp(KeyCode.LeftAlt) || Input.GetKeyUp(KeyCode.RightAlt);
     }
 }

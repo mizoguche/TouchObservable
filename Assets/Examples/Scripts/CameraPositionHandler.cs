@@ -31,15 +31,8 @@ public class CameraPositionHandler : MonoBehaviour
             .Select(touch => touch.DeltaPosition)
             .Where(delta => delta != Vector2.zero)
             .Select(delta => cameraContainerTransform.rotation * new Vector3(-delta.x * moveSpeed * 0.05f, 0, -delta.y * moveSpeed * 0.05f))
+            .Select(delta => new Vector3(delta.x, 0, delta.z))
             .Subscribe(delta => cameraContainerTransform.position += delta);
-
-        touchObservable.Pinch
-            .TakeUntil(touchObservable.PinchEnd)
-            .Buffer(2, 1)
-            .Where(t => t.Count == 2)
-            .RepeatUntilDestroy(this)
-            .Select(t => t.Last().Distance - t.First().Distance)
-            .Subscribe(delta => transform.localPosition -= new Vector3(0, delta * moveSpeed * 0.05f, -delta * moveSpeed * 0.05f));
 
         touchObservable.DoubleDrag
             .Select(t => t.Touches[0].DeltaPosition)
